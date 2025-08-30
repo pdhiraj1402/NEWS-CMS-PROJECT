@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate-v2');
 
-const newsSchema = new mongoose({
+const newsSchema = new mongoose.Schema({   
     title:{
         type:String,
         required:true

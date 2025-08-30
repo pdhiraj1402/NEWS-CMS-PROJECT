@@ -24,6 +24,17 @@ app.set('view engine', 'ejs');
 // Database connection
 mongoose.connect(process.env.MONGO_URI);
 
+//  Routes
+app.use('/', require('./routes/frontend'));
+
+app.use('/admin', (req, res,  next) => {
+   res.locals.layout = 'admin/layout';
+   next();
+})
+
+app.use('/admin', require('./routes/admin'));
+
+
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
