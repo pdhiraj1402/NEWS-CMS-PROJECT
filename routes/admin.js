@@ -17,7 +17,7 @@ router.get('/settings', userController.settings);
 router.get('/users', userController.allUser);
 router.get('/add-user', userController.addUserPage);
 router.post('/add-user', userController.addUser);
-router.get('/update-user', userController.updateUserPage);
+router.get('/update-user/:id', userController.updateUserPage);
 router.post('/update-user', userController.updateUser);
 router.get('/delete-user/:id', userController.deleteUser);
 
