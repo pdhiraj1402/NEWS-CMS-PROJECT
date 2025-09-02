@@ -7,6 +7,7 @@ const isLoggedIn = async (req, res, next) => {
         }
         const tokenData = jwt.verify(token, process.env.JWT_SECRET);
         req.role = tokenData.role;
+        req.id = tokenData.id;
         req.fullname = tokenData.fullname;
         next();
     } catch (err) {
