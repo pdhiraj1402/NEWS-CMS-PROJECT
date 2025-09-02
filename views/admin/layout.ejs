@@ -13,8 +13,7 @@
     <!-- Custom stlylesheet -->
     <link rel="stylesheet" href="/css/style.css">
 
-    <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
-
+   <%- typeof tabulatorCSS === 'undefined' ? '' : tabulatorCSS %>
   </head>
   <body>
     <!-- HEADER -->
@@ -51,18 +50,22 @@
               <li>
                 <a href="/admin/article">Articles</a>
               </li>
+              <% if (role === 'admin') { %>
               <li>
                 <a href="/admin/category">Category</a>
               </li>
               <li>
                 <a href="/admin/users">Users</a>
               </li>
+               <% } %>
               <li>
                 <a href="/admin/comments">Comments</a>
               </li>
+              <% if (role === 'admin') { %>
               <li>
                 <a href="/admin/settings">Settings</a>
               </li>
+              <% } %>
             </ul>
           </div>
         </div>
