@@ -22,7 +22,7 @@
                         <label for="article_category" class="form-label">Category</label>
                         <select name="category" id="article_category" class="form-control">
                             <% categories.forEach((category) => { 
-                                if(articles.category.id == category.id) { %>
+                                if(article.category.id == category.id) { %>
                                     <option value="<%= category.id %>" selected><%= category.name %></option>
                             <% } else{ %>
                                     <option value="<%= category.id %>"><%= category.name %></option>

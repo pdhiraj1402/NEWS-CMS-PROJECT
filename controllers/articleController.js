@@ -23,20 +23,22 @@ const allArticle = async (req, res) => {
 };
 
 const addArticlePage = async (req, res) => {
-  const categories = categoryModel.find();
+  const categories = await categoryModel.find();
   res.render("admin/article/create", {role:req.role, categories});
 };
 
 const addArticle = async (req, res) => {
+ 
   try{
     const {title, content, category} = req.body;
     const article = new newsModel({
       title,
       content,
       category,
-      author:req.user.id,
+      author:req.id,
       image:req.file.filename
-    });
+    }); 
+
     await article.save();
     res.redirect('/admin/article');
   }
@@ -47,7 +49,7 @@ const addArticle = async (req, res) => {
 
 const updateArticlePage = async (req, res) => {
   try{
-    const id = req.param.id;
+    const id = req.params.id;
     const article = await newsModel.findById(id)
                                     .populate('category', 'name')
                                     .populate('author', 'fullname');
@@ -69,7 +71,7 @@ const updateArticlePage = async (req, res) => {
 
 const updateArticle = async (req, res) => {
   try{
-    const id = req.param.id;
+    const id = req.params.id;
     const {title, content, category} = req.body;
     const article = await newsModel.findById(id);
     if(!article){

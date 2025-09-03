@@ -10,18 +10,20 @@ const addCategoryPage = async (req, res) => {
 };
 
 const addCategory = async (req, res) => {
-    try{
-        await category.create(req.body);
+    try {
+        console.log(req.body);
+        await categoryModel.create(req.body);
         res.redirect('/admin/category');
-    }
-    catch(error){
+    } catch (error) {
         res.status(400).send(error);
     }
 };
 
 const updateCategoryPage = async (req, res) => { 
+    const id = req.params.id;
+    console.log(id);
     try{
-        const id = req.param.id;
+        
         const category = await categoryModel.findById(id);
         if(!category){
             return res.status(404).send('Category not found');
@@ -35,7 +37,7 @@ const updateCategoryPage = async (req, res) => {
 
 const updateCategory = async (req, res) => { 
     try{
-        const id = req.param.id;
+        const id = req.params.id;
         const {name, description} = req.body;
         const category = await categoryModel.findByIdAndUpdate(id, req.body);
         if(!category){

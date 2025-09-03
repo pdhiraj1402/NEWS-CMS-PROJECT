@@ -23,8 +23,8 @@
                     <select name="category" id="article_category" class="form-control">
                         <option disabled selected> Select Category</option>
                         <% categories.forEach((category) => { %>
-                            <option value="<%= category.id %>"><%= category.name %></option>
-                        <% }); %>
+                            <option value="<%= category._id %>"><%= category.name %></option>
+                        <% }) %>
                     </select>
                 </div>
                 <div class="mb-3">
