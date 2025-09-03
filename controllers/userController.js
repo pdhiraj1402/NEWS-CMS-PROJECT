@@ -1,4 +1,7 @@
 const userModel = require("../models/User");
+const categoryModel = require("../models/Category");
+const articleModel = require("../models/Article");
+const settingModel = require("../models/Setting");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
@@ -35,11 +38,56 @@ const logout = async (req, res) => {
 };
 
 const dashboard = async (req, res) => {
-  res.render("admin/dashboard", {role:req.role, fullname:req.fullname});
+    try{
+        let articleCount;
+        if(req.role === "author"){
+          articleCount = await articleModel.countDocuments({author:req.id});
+        }
+        else{
+          articleCount = await articleModel.countDocuments();
+        }
+        const categoryCount = await categoryModel.countDocuments();
+        const userCount = await userModel.countDocuments();
+        res.render("admin/dashboard", 
+        {
+          role:req.role, 
+          fullname:req.fullname,
+          userCount,
+          categoryCount,
+          articleCount
+        });
+    }
+    catch(error){
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+    }
 };
 
 const settings = async (req, res) => {
-  res.render("admin/settings", {role:req.role});
+  try{
+    const Settings = await settingModel.findOne();
+    res.render("admin/settings", {role:req.role, Settings});
+  }catch(error){
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  };
+};
+
+const saveSettings = async (req, res) => {
+  const {website_title, footer_description} = req.body;
+  const website_logo = req.file ? req.file.filename : null;
+  try{
+    const settings  = await settingModel.findOneAndUpdate(
+      {},
+      {website_title, website_logo, footer_description},
+      {new:true, upsert:true}
+    );
+    res.redirect("admin/settings");
+  }catch(error){
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  };
+  
 };
 
 const allUser = async (req, res) => {
@@ -126,4 +174,5 @@ module.exports = {
   deleteUser,
   dashboard,
   settings,
+  saveSettings
 };
