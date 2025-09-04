@@ -1,6 +1,6 @@
 const userModel = require("../models/User");
 const categoryModel = require("../models/Category");
-const articleModel = require("../models/Article");
+const articleModel = require("../models/News");
 const settingModel = require("../models/Setting");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
@@ -82,7 +82,7 @@ const saveSettings = async (req, res) => {
       {website_title, website_logo, footer_description},
       {new:true, upsert:true}
     );
-    res.redirect("admin/settings");
+    res.redirect("/admin/settings");
   }catch(error){
     console.error(error);
     res.status(500).send('Internal Server Error');

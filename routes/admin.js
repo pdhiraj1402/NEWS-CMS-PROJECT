@@ -16,7 +16,7 @@ router.post('/index', userController.adminLogin);
 router.get('/logout', userController.logout);
 router.get('/dashboard', isLoggedIn, userController.dashboard);
 router.get('/settings', isLoggedIn, isAdmin, userController.settings);
-router.get('/save-settings', isLoggedIn, isAdmin, upload.single('website_logo'), userController.saveSettings);
+router.post('/save-settings', isLoggedIn, isAdmin, upload.single('website_logo'), userController.saveSettings);
 
 //  User CRUD Routes
 router.get('/users', isLoggedIn, isAdmin, userController.allUser);
@@ -44,5 +44,12 @@ router.delete('/delete-article/:id', isLoggedIn, articleController.deleteArticle
 
 //  Comment Routes
 router.get('/comments', isLoggedIn, commentController.allComments);
+
+router.use((req, res) => 
+    { 
+        const message = 'Page Not Found';
+        res.status(404).render('admin/404', {role:req.role, message});
+    }
+);
 
 module.exports = router;
