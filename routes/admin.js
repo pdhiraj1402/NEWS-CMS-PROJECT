@@ -45,11 +45,23 @@ router.delete('/delete-article/:id', isLoggedIn, articleController.deleteArticle
 //  Comment Routes
 router.get('/comments', isLoggedIn, commentController.allComments);
 
-router.use((req, res) => 
+// 404 Error Middleware
+router.use(isLoggedIn, (req, res, next) => 
     { 
         const message = 'Page Not Found';
         res.status(404).render('admin/404', {role:req.role, message});
     }
 );
+
+// 500 Error Middleware
+router.use(isLoggedIn, (err, req, res, next) => { 
+    const message = 'Page Not Found';
+    const status = err.status || 500;
+    const view = status === 404 ? 'admin/404' : 'admin/500'
+    res.status(status).render(view, {
+        role:req.role, 
+        message: err.message || 'Internal Server Error'
+    });
+});
 
 module.exports = router;

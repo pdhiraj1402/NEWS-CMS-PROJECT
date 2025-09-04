@@ -3,8 +3,9 @@ const newsModel = require("../models/News");
 const userModel = require("../models/User");
 const fs = require("fs");
 const path = require("path");
+const createError = require("../utils/error-message");
 
-const allArticle = async (req, res) => {
+const allArticle = async (req, res, next) => {
   try{
     let articles;
     if(req.role==="admin"){
@@ -20,7 +21,9 @@ const allArticle = async (req, res) => {
     res.render("admin/article", {role:req.role, articles});
   }
   catch(error){
-    res.status(500).send('Server Error');
+    // console.error(error);
+    // res.status(500).send('Server Error');
+    next(error);
   }
 };
 
@@ -29,7 +32,7 @@ const addArticlePage = async (req, res) => {
   res.render("admin/article/create", {role:req.role, categories});
 };
 
-const addArticle = async (req, res) => {
+const addArticle = async (req, res, next) => {
  
   try{
     const {title, content, category} = req.body;
@@ -45,43 +48,52 @@ const addArticle = async (req, res) => {
     res.redirect('/admin/article');
   }
   catch(error){
-    res.status(500).send('Internal Server Error');
+    // res.status(500).send('Internal Server Error');
+    next(error);
   }
 };
 
-const updateArticlePage = async (req, res) => {
+const updateArticlePage = async (req, res, next) => {
   try{
     const id = req.params.id;
     const article = await newsModel.findById(id)
                                     .populate('category', 'name')
                                     .populate('author', 'fullname');
     if(!article){
-      return res.status(404).send('Article Not Found');
+      // return res.status(404).send('Article Not Found');
+      // const error = new Error('Article Not Found'); 
+      // error.status = 404;
+      // return next(error);
+      return next(createError('Article Not Found', 404));
     }
     if(req.role === "author"){
       if(req.id !== article.author._id){
-        return res.status(401).send('Unauthorized');
+        // return res.status(401).send('Unauthorized');
+        return next(createError('Unauthorized', 401));
       }
     }
     const categories = await categoryModel.find();
     res.render("admin/article/update", {role:req.role, article, categories});
   }
   catch(error){
-    res.status(500).send('Internal Server Error');
+    // res.status(500).send('Internal Server Error');
+    next(error);
   }
 };
 
-const updateArticle = async (req, res) => {
+const updateArticle = async (req, res, next) => {
   try{
     const id = req.params.id;
     const {title, content, category} = req.body;
     const article = await newsModel.findById(id);
     if(!article){
-      return res.status(404).send('Article Not Found');
+      // return res.status(404).send('Article Not Found');
+      return next(createError('Article Not Found', 404));
     }
     if(req.role === "author"){
       if(req.id != article.author._id){
-        return res.status(401).send('Unauthorized');
+        // return res.status(401).send('Unauthorized');
+        return next(createError('Unauthorized', 401));
       }
     }
     article.title = title;
@@ -96,20 +108,23 @@ const updateArticle = async (req, res) => {
     res.redirect('/admin/article');
   }
   catch(error){
-    res.status(500).send('Internal Server Error');
+    // res.status(500).send('Internal Server Error');
+    next(error);
   }
 };
 
-const deleteArticle = async (req, res) => {
+const deleteArticle = async (req, res, next) => {
   try{
     const id = req.param.id;
     const article = await newsModel.findById(id);
     if(!article){
-      return res.status(404).send('Article Not Found');
+      // return res.status(404).send('Article Not Found');
+      return next(createError('Article Not Found', 404));
     }    
     if(req.role === "author"){
       if(req.id != article.author._id){
-        return res.status(401).send('Unauthorized');
+        // return res.status(401).send('Unauthorized');
+        return next(createError('Unauthorized', 401));
       }
     }
     try{
@@ -125,6 +140,7 @@ const deleteArticle = async (req, res) => {
   }
   catch(error){
     res.status(500).send('Internal Server Error');
+    next(error);
   }
 };
 

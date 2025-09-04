@@ -2,6 +2,7 @@ const userModel = require("../models/User");
 const categoryModel = require("../models/Category");
 const articleModel = require("../models/News");
 const settingModel = require("../models/Setting");
+const createError = require("../utils/error-message");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
@@ -11,16 +12,18 @@ const loginPage = async (req, res) => {
   res.render("admin/login", { layout: false });
 };
 
-const adminLogin = async (req, res) => {
+const adminLogin = async (req, res, next) => {
   try {
     const { username, password } = req.body;
     const user = await userModel.findOne({ username });
     if (!user) {
-      return res.status(401).send("Invalid username or password1");
+      // return res.status(401).send("Invalid username or password");
+      return next(createError('Invalid username or password', 401));
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if(!isMatch){
-        return res.status(401).send("Invalid username or password");
+        // return res.status(401).send("Invalid username or password");
+        return next(createError('Invalid username or password', 401));
     }
     console.log(user);
     const jwtData = { id: user._id, fullname: user.fullname , role: user.role };
@@ -28,7 +31,8 @@ const adminLogin = async (req, res) => {
     res.cookie("token", token, { httpOnly: true, maxAge: 60 * 60 * 1000 });
     res.redirect("/admin/dashboard");
   } catch (err) {
-    res.status(500).send("Internal Server Error");
+    // res.status(500).send("Internal Server Error");
+    next(error);
   }
 };
 
@@ -37,7 +41,7 @@ const logout = async (req, res) => {
   res.redirect("/admin/");
 };
 
-const dashboard = async (req, res) => {
+const dashboard = async (req, res, next) => {
     try{
         let articleCount;
         if(req.role === "author"){
@@ -58,22 +62,24 @@ const dashboard = async (req, res) => {
         });
     }
     catch(error){
-      console.error(error);
-      res.status(500).send('Internal Server Error');
+      // console.error(error);
+      // res.status(500).send('Internal Server Error');
+      next(error);
     }
 };
 
-const settings = async (req, res) => {
+const settings = async (req, res, next) => {
   try{
     const Settings = await settingModel.findOne();
     res.render("admin/settings", {role:req.role, Settings});
   }catch(error){
-    console.error(error);
-    res.status(500).send('Internal Server Error');
+    // console.error(error);
+    // res.status(500).send('Internal Server Error');
+    next(error);
   };
 };
 
-const saveSettings = async (req, res) => {
+const saveSettings = async (req, res, next) => {
   const {website_title, footer_description} = req.body;
   const website_logo = req.file ? req.file.filename : null;
   try{
@@ -84,19 +90,21 @@ const saveSettings = async (req, res) => {
     );
     res.redirect("/admin/settings");
   }catch(error){
-    console.error(error);
-    res.status(500).send('Internal Server Error');
+    // console.error(error);
+    // res.status(500).send('Internal Server Error');
+    next(error);
   };
   
 };
 
-const allUser = async (req, res) => {
+const allUser = async (req, res, next) => {
   try {
     const users = await userModel.find();
     res.render("admin/users", {users, role:req.role});
   } catch (err) {
-    console.error('Error While fetching the users:', err);
-    res.status(500).send('Failed to get the users');
+    // console.error('Error While fetching the users:', err);
+    // res.status(500).send('Failed to get the users');
+    next(error);
   }
 };
 
@@ -104,36 +112,40 @@ const addUserPage = async (req, res) => {
   res.render("admin/users/create", {role:req.role});
 };
 
-const addUser = async (req, res) => {
+const addUser = async (req, res, next) => {
   try {
     await userModel.create(req.body);
     res.redirect('/admin/users');
   } catch (err) {
-    console.error('Error adding user:', err);
-    res.status(500).send('Failed to add user');
+    // console.error('Error adding user:', err);
+    // res.status(500).send('Failed to add user');
+    next(error);
   }
 };
 
-const updateUserPage = async (req, res) => {
+const updateUserPage = async (req, res, next) => {
     try{
         const id = req.params.id;
         const user = await userModel.findById(id);
         if(!user){
-            return res.status(404).send('User not found');
+            // return res.status(404).send('User not found');
+            return next(createError('User Not Found', 404));
         }
         res.render("admin/users/update", {user, role:req.role});
     }catch(err){
-        res.status(500).send('Internal Server Error');
+        // res.status(500).send('Internal Server Error');
+        next(error);
     }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const id = req.params.id;
     const {fullname, password, role} = req.body;
     const user = await userModel.findById(id);
     if(!user){
-      return res.status(404).send('User not found');
+      // return res.status(404).send('User not found');
+      return next(createError('User Not Found', 404));
     }
 
     user.fullname = fullname || user.fullname;
@@ -144,21 +156,23 @@ const updateUser = async (req, res) => {
     await user.save();
     res.redirect('/admin/users');
   } catch (err) {
-    res.status(500).send('Internal Server Error');
+    // res.status(500).send('Internal Server Error');
+    next(error);
   }
 };
 
-
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
     try{
         const id = req.params.id;
         const user = await userModel.findByIdAndDelete(id);
         if(!user){
-            return res.status(404).send('User not found');
+            // return res.status(404).send('User not found');
+            return next(createError('User Not Found', 404));
         }
         res.json({success:true});
     }catch(err){
-        res.status(500).send('Internal Server Error');
+        // res.status(500).send('Internal Server Error');
+        next(error);
     }    
 };
 
