@@ -8,11 +8,12 @@ const userController = require('../controllers/userController');
 const isLoggedIn = require('../middleware/isLoggedin');
 const isAdmin = require('../middleware/isAdmin');
 const upload = require('../middleware/multer');
+const isValid = require('../middleware/validation');
 
 
 //  Login Routes
 router.get('/', userController.loginPage);
-router.post('/index', userController.adminLogin);
+router.post('/index', isValid.loginValidation, userController.adminLogin);
 router.get('/logout', userController.logout);
 router.get('/dashboard', isLoggedIn, userController.dashboard);
 router.get('/settings', isLoggedIn, isAdmin, userController.settings);

@@ -6,13 +6,26 @@ const createError = require("../utils/error-message");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
+const {validationResult} = require("express-validator");
+
 dotenv.config();
 
 const loginPage = async (req, res) => {
-  res.render("admin/login", { layout: false });
+  res.render("admin/login", {
+     layout: false,
+     errors:0
+  });
 };
 
 const adminLogin = async (req, res, next) => {
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.render("admin/login", {
+         layout: false,  
+         errors:errors.array()
+    });
+  }
+
   try {
     const { username, password } = req.body;
     const user = await userModel.findOne({ username });
