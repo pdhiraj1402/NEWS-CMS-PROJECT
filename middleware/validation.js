@@ -107,6 +107,7 @@ const articleValidation = [
         .trim()
         .notEmpty()
         .withMessage('Category is required')
+    
 ];
 
 module.exports = {

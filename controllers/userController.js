@@ -122,10 +122,19 @@ const allUser = async (req, res, next) => {
 };
 
 const addUserPage = async (req, res) => {
-  res.render("admin/users/create", {role:req.role});
+  res.render("admin/users/create", {role:req.role, errors:0});
 };
 
 const addUser = async (req, res, next) => {
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.render("admin/user/create", {
+        role:req.role,
+        errors:errors.array()
+    });
+  }
+
   try {
     await userModel.create(req.body);
     res.redirect('/admin/users');
@@ -137,14 +146,14 @@ const addUser = async (req, res, next) => {
 };
 
 const updateUserPage = async (req, res, next) => {
+    const id = req.params.id;
     try{
-        const id = req.params.id;
         const user = await userModel.findById(id);
         if(!user){
             // return res.status(404).send('User not found');
             return next(createError('User Not Found', 404));
         }
-        res.render("admin/users/update", {user, role:req.role});
+        res.render("admin/users/update", {user, role:req.role, errors:0});
     }catch(err){
         // res.status(500).send('Internal Server Error');
         next(error);
@@ -152,6 +161,17 @@ const updateUserPage = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
+  const id = req.params.id;
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    return res.render("admin/user/update", {
+        user:req.body,
+        role:req.role,
+        errors:errors.array()
+    });
+  }
+  
   try {
     const id = req.params.id;
     const {fullname, password, role} = req.body;

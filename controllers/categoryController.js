@@ -1,5 +1,6 @@
 const categoryModel = require('../models/Category');
 const createError = require("../utils/error-message");
+const {validationResult} = require("express-validator");
 
 const allcategory = async (req, res, next) => {
     try{
@@ -13,10 +14,19 @@ const allcategory = async (req, res, next) => {
 };
 
 const addCategoryPage = async (req, res) => {
-    res.render('admin/categories/create', {role:req.role});
+    res.render('admin/categories/create', {role:req.role, errors:0});
 };
 
 const addCategory = async (req, res, next) => {
+
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.render("admin/categories/create", {
+            role:req.role,
+            errors:errors.array()
+        });
+    }
+
     try {
         console.log(req.body);
         await categoryModel.create(req.body);
@@ -37,7 +47,7 @@ const updateCategoryPage = async (req, res, next) => {
             // return res.status(404).send('Category not found');
             return next(createError('Category Not Found', 404));
         }
-        res.render('admin/categories/update', {category, role:req.role});
+        res.render('admin/categories/update', {category, role:req.role, errors:0});
     }
     catch(error){
         // res.status(500).send('Internal Server Error');
@@ -45,7 +55,19 @@ const updateCategoryPage = async (req, res, next) => {
     }
 };
 
-const updateCategory = async (req, res, next) => { 
+const updateCategory = async (req, res, next) => {
+
+    const id = req.params.id;
+    const errors = validationResult(req);
+        if(!errors.isEmpty()){
+        const category = await categoryModel.findById(id);
+        return res.render("admin/categories/update", {
+            category,
+            role:req.role,
+            errors:errors.array()
+        });
+    }
+
     try{
         const id = req.params.id;
         const {name, description} = req.body;
